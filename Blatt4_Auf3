@@ -1,0 +1,28 @@
+import numpy as np
+import tensorflow as tf
+import matplotlib.pyplot as plt
+
+def Gaussian(x, mu=0, sigma=1):
+    if x.ndim == 1:
+        x = x[:, np.newaxis] 
+    return np.exp(-np.linalg.norm(x - mu, axis=-1)**2 / (2 * sigma**2))
+
+#Generating
+y = Gaussian(x, mu=-2, sigma=0.5) + 2 * Gaussian(x, mu=2, sigma=1)
+x = np.linspace(-5, 5, 100)
+
+#Neuronal Network Model (maybe not with tanh?)
+model = tf.keras.models.Sequential([tf.keras.layers.Dense(2, activation='tanh', input_shape=(1,)), tf.keras.layers.Dense(1)])
+
+#Compiling a model
+model.compile(optimizer='adam', loss='mse')
+model.fit(x, y, epochs=1000, verbose=0)
+
+#Predicting output
+y_pred = model.predict(x)
+
+#Original and predicted functions
+plt.plot(x, y, label='original')
+plt.plot(x, y_pred, label='predicted')
+plt.legend()
+plt.show()
