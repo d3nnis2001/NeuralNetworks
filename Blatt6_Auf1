@@ -1,0 +1,43 @@
+import numpy as np
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import backend as K
+
+class RBFLayer(keras.layers.Layer):
+    # TODO: Add initializer parameters to init
+    def __init__(self, units, gamma_initializer='zeros', **kwargs):
+        super(RBFLayer, self).__init__(**kwargs)
+        # TODO: Do something with the additional parameters
+        self.units = units
+        self.gamma_initializer = keras.initializers.get(gamma_initializer)
+
+    def build(self, input_shape):
+        # TODO: Initialize properties depending on `input_shape`
+        input_dim = input_shape[-1]
+        self.centers = self.add_weight(
+            shape=(input_dim, self.units),
+            initializer='uniform',
+            trainable=True,
+            name='center'
+        )
+        self.gamma = self.add_weight(
+            shape=(self.units,),
+            initializer=self.gamma_initializer,
+            trainable=True,
+            name='gamma'
+        )
+        super(RBFLayer, self).build(input_shape)
+
+    def call(self, inputs):
+        # TODO: Process input and return
+        expanded_inputs = K.expand_dims(inputs, axis=-1)
+        squared_distances = K.sum(K.square(expanded_inputs - self.centers), axis=-2)
+        output = K.exp(-self.gamma * squared_distances)
+        # TODO: Generate and return initialization
+        return output
+
+# Example usage:
+X = tf.ones((3, 5))  # input tensor X with batch dimension 3 and data dim N=5
+mu = tf.ones((5, 2))  # tensor mu with data dim N=5 and 2 units
+diffs = K.expand_dims(X, axis=-1) - mu  # diffs tensor: 3 x 5 x 2
+print(X.shape, mu.shape, diffs.shape)
